@@ -1,0 +1,483 @@
+---
+title: "Exercice 2"
+author: "DR. ASRI"
+output:
+  pdf_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Porblème 
+
+Dans cet on va étudier le problème de prix de vente de véhicules d'occasion (déjà utilisée) par la plus grande de société de vente de véhicules d'occasion en Europe. La société propose deux types de ventes qui ne sont pas expliqué au statisticien (On trouve une variable qui précise quel type utilisé pour chaque voiture). 
+
+Pour étudier ce problème la société a proposer d'utiliser la base de données "Data.csv" qui contient une dizaine de variables et plus de 200 milles véhicules dans leurs sites. 
+
+La base de données contient les variables suivantes : 
+
+*sourcing_country :* Le pays d'origine de la voiture mise en vente.
+*manufacturer :* Le marque du fabricant de la voiture.
+*fuel_type :* Le type de carburant utilisé de cette voiture.
+*built_year :* L'année de construction.
+*mileage :* Nombre de Miles parcourus par cette voiture.
+*horsepower :* Nombre de cheveaux (puissance) de cette voiture.
+*kw :* Une autre mesure pour la puissance de la voiture en Kilowatts.
+*bought_date :* La date ou la société a acheté la voiture.
+*sold_date :* La date ou la société a vendu la voiture (si la voiture a été vendu durant la période ou les données soient collectées).
+*buy_price :* Le prix de vente de la voiture si la voiture a été vendue et le prix proposé de vente sinon.
+*sold :* si la voiture a été vendue ou non.
+*sales_channel :* Le type de vente proposé par la société. 
+
+## Questions.
+
+Lire la base "Data.csv" accompagné avec ce document.
+
+### Question 1
+
+*1.* Inspecter la base de données et préciser le nombre d'observations
+
+*2.* Préciser combien y a t'il de variables pour chaque type
+
+*3.* Y-a-t'il de variables avec valeurs manquantes dans cette base ?
+
+### Question 2
+
+*1.* précisez le nombre de véhicule pour chaque pays d'origine
+
+*2.* précisez le pourcentage de véhciules pour chaque type de benzine utilisé ? et le pourcentage de type de vente précisé 
+
+*3.* combien y'a-t'il de constructeur véhicules présents dans cette base ? citez les cinq plus grand constructeurs (les constructeurs avec le plus grand nombre de véhicules dans la base)
+
+### Question 3
+
+*1.* analyser l'année de construction quel est l'écart interquartile de l'année de construction
+
+*2.* donner le sommaire statistique de la puissance ? détecter les anomalies 
+
+*3.* même question pour la puissance en kw
+
+*4.* Donner la moyenne, la médiane, la variance et l'écart-type de nombre de miles parcourus par ces véhciules ? Commmenter.
+
+*5.* Inspecter le prix de vente en précisant son sommaire statistique ? détecter les anomalies
+
+*6.* Filter les anomalies détectés dans les 4 questions précédentes ? préciser le nombre de véhicules restants dans la nouvelles base.
+
+### Question 4 
+
+*1.* Calculer la médiane du prix de vente des véhicules pour les cinq meilleurs constructeurs pour les voitures américaines
+
+*2.* Calculer les quartiles du prix de ventes pour les voitures chinoises qui ont parcourus pour de 158000 miles et qui ont été vendus pour le deuxième type ? et celle pour le premier type ?
+
+*3.* Calculer la variance du prix de ventes pour les voitures d'essence qui ont une puissance de plus de 66 kw 
+
+*4.* calculer l'erreur absolue moyenne de prix de vente ? pour le prix de vente pour les véhicules américaines avec une puissance inférieure à 127 chevaux
+
+*5.* Calculer l'écart-interquartile pour la puissances des véhicules qui ont un prix de vente inférieure à 20000
+
+*6.* Donner le prix de vente pour les véhicules modernes et classique (ou un véhciule moderne est fabriqué après 1993 et classique avant 1993)
+
+*7.* Donner la fréquence des véhciules modernes et classique en précisant la moyenne de prix de vente pour chaque catégorie 
+
+*8.* Calculer l'écart-type de la puissance (en chevaux et en kw) des véhciules modernes fabrique en USA qui ont sont vendus par le deuxième type de vente
+
+### Question 4
+
+*1.* créer une nouvelle variable qui précise le nombre de jours nécessaires pour la vente du véhicule 
+
+*2.* Calculer la moyenne de cette variable et son écart type
+
+*3.* Préciser le sommaire statistique pour le cas du premeir type et deuxième type de vente
+
+*4.* Y a t'il un type de vente qui permet de vendre un véhicule plus rapidement ? expliquez 
+
+*5.* Quel est l'origine du véhicule qui permet une vitesse de vente plus rapide dans le site
+
+### Question 5 
+
+*1.* Calculer la corrélation entre le prix de vente et le nombre de jour jusqu'à la vente. Commenter
+
+*2.* Calculer la corrélation entre le prix de vente et la puissance. Commenter 
+
+*3.* Calculer la corrélation entre toutes les variables numériques ? Quels sont les variables fortement et faiblement corrélés entre ell
+
+
+
+
+ les réponses :
+ 
+ 
+```{r}
+library(tidyverse)
+data <- read_csv("data.csv")
+```
+    Question 01 :
+
+1- inspecter la basse :
+ 
+```{r}
+ glimpse(data)
+```  
+*il y a 244699 observations 
+2- il y a 12 variables pour chaque type 
+
+3- les variables avec valeurs manquantes dans cette base :
+
+```{r}
+summary(data)
+```
+ *"solde data" la seule variable qui contient NA
+ 
+   PARTIE 02 : 
+   
+1-le nombre de véhicule pour chaque pays d’origine :
+```{r}
+data %>%
+ group_by(manufacturer)%>%
+ count(sourcing_country)
+```
+2-le pourcentage de véhciules pour chaque type de benzine utilisé :
+```{r}
+data %>% 
+ group_by(fuel_type)%>%
+ summarise(fréquence = n(),fréquence_relative = n()/nrow(data)*100)
+```
+*le pourcentage de type de vente précisé :
+```{r}
+ data %>% 
+ group_by(sales_channel)%>%
+ summarise(fréquence = n(),fréquence_relative = n()/nrow(data)*100)
+```
+3-le nombre constructeur véhicules présents dans cette base : 
+```{r}
+data%>% 
+ count(manufacturer)%>%
+ arrange(-n)%>%
+ slice(1:5)%>%
+ pull(manufacturer)
+```
+
+
+ Question 03 :
+   
+1-l’écart interquartile de l’année de construction :
+
+```{r}
+data%>%
+ summarise(quantiles = quantile(built_year, na.rm = TRUE, probs = c(0.25, 0.75)))
+```
+ 
+ 
+ 
+ 2- le sommaire statistique de la puissance : 
+
+```{r}
+data %>%
+ pull(horsepower) %>%
+ summary()
+ 
+```
+les anomalies sont : 
+
+```{r}
+data %>%
+  select(horsepower)%>%
+summarise(Anomalie= quantile(horsepower,na.rm = TRUE, probs=0.75)+ 1.5*IQR(horsepower,na.rm = TRUE))
+```
+
+```{r}
+data %>%
+  select(horsepower)%>%
+summarise(Anomalie= 150+ 1.5*IQR(horsepower,na.rm = TRUE))
+```
+
+
+3- pour la puissance en KW : 
+```{r}
+data %>%
+ pull(kw) %>%
+ summary()
+```
+4- la moyenne, la médiane, la variance et l’écart-type de nombre de miles parcourus par ces véhciules : 
+```{r}
+data %>%
+ summarise(moyenne = mean(mileage, na.rm = TRUE))
+```
+*le nombre de miles moyen parcourus par ces véhciules est 158021
+
+
+```{r}
+data %>% 
+ summarise(variance = var(mileage, na.rm = TRUE))
+```
+*la variance de nombre de  miles parcourus par ces véhciules est 2.31
+
+```{r}
+data%>%
+ summarise(médiane = median(mileage, na.rm = TRUE))
+```
+* la médiane de nombre de miles parcourus par ces véhciules est 133341 
+
+```{r}
+data%>%
+ summarise(écartype = sd(mileage, na.rm = TRUE))
+   
+```
+ * l'ecartype de nombre de miles parcourus par ces véhciules est 4810826
+ 
+5-  Inspecter le prix de vente en précisant son sommaire statistique : 
+ 
+```{r}
+data %>%
+ pull(buy_price) %>%
+ summary()
+```
+ * les anomalies: 
+```{r}
+data %>% 
+ select(buy_price)%>%
+  summarise(Anomalie= quantile(buy_price,na.rm = TRUE, probs=0.75)+ 1.5*IQR(buy_price,na.rm = TRUE) )
+```
+
+ Question 04 :
+ 
+ 1- la médiane du prix de vente des véhicules pour les cinq meilleurs constructeurs pour les voitures américaines : 
+```{r}
+data %>%
+  filter(sourcing_country == "USA") %>%
+  select(sourcing_country,buy_price) %>%
+  arrange(-buy_price) %>%
+  slice(1:5) %>%
+  summarise(median=median(buy_price,na.rm =TRUE))
+```
+ 
+2- les quartiles du prix de ventes pour les voitures chinoises qui ont parcourus pour de 158000 miles:
+```{r}
+data %>%
+  select(sourcing_country, mileage, buy_price, sales_channel) %>%
+  filter(sourcing_country== "China",
+         mileage== 158000,
+         sales_channel == "auction_type1") %>%
+  summarise(quartile=quantile(buy_price,na.rm =TRUE,probs=c(0.25,0.5,0.75)))
+```
+pour le deuxième type : 
+
+```{r}
+data %>%
+  select(sourcing_country, mileage, buy_price, sales_channel) %>%
+  filter(sourcing_country== "China",
+         mileage== 158000,
+         sales_channel== "auction_type2") %>%
+  summarise(quartile=quantile(buy_price,na.rm =TRUE,probs=c(0.25,0.5,0.75)))
+```
+
+3-la variance du prix de ventes pour les voitures d’essence qui ont une puissance de plus de 66 kw:
+```{r}
+data %>%
+  select(fuel_type, kw, buy_price)%>%
+  filter(fuel_type== "Benzin",
+         kw >66)%>%
+  summarise(variance=var(buy_price,na.rm =TRUE))
+  
+  
+```
+4- l’erreur absolue moyenne de prix de vente :
+
+```{r}
+mae <- function(x){
+médiane = median(x, na.rm = TRUE)
+m <- sum(abs(x- médiane), na.rm = TRUE)
+mae <- m/nrow(data)
+return(mae)
+}
+
+
+data %>%
+summarise(mae = mae(buy_price))
+
+
+
+```
+et pour le prix de vente pour les véhicules américaines
+avec une puissance inférieure à 127 chevaux
+```{r}
+data%>%
+  select(buy_price, kw, sourcing_country )%>%
+  filter(kw <127 ,
+         sourcing_country == "USA")%>%
+  summarise(mae= mae(buy_price))
+
+```
+5-l’écart-interquartile pour la puissances des véhicules qui ont un prix de vente inférieure à 20000 : 
+
+```{r}
+data%>%
+  select(kw, buy_price)%>%
+  filter(buy_price <20000)%>%
+  summarise(IQR=quantile(kw,na.rm =TRUE,probs=c(0.25,0.75)))
+```
+
+6- le prix de vente pour les véhicules modernes et classique (ou un véhciule moderne est fabriqué
+après 1993 et classique avant 1993): 
+
+```{r}
+data%>%
+select(built_year, buy_price)%>%
+filter(!is.na(built_year)) %>%
+mutate(kind = case_when(built_year >1993 ~ "New",
+built_year<1993 ~ "Classic")) %>%
+count(kind, buy_price)
+```
+7- la fréquence des véhciules modernes et classique en précisant la moyenne de prix de vente pour
+chaque catégorie:
+pour la catégorie 01 modèrne : kind1
+
+```{r}
+data%>%
+select(built_year, buy_price)%>%
+filter(!is.na(built_year)) %>%
+mutate(kind1 = case_when(built_year >1993 ~ "New")) %>%
+count(kind1, buy_price)%>%
+ summarise(fréquence = n(),moyenne= mean(buy_price))
+```
+
+```
+  
+```
+pour la catégorie 02 classiques : kind2
+
+```{r}
+data%>%
+select(built_year, buy_price)%>%
+filter(!is.na(built_year)) %>%
+mutate(kind2 = case_when(built_year <1993 ~ "Classic")) %>%
+count(kind2, buy_price)%>%
+ summarise(fréquence = n(),moyenne= mean(buy_price))
+```
+
+ 
+8-  l’écart-type de la puissance (en chevaux et en kw) des véhciules modernes fabrique en USA qui
+ont sont vendus par le deuxième type de vente : 
+
+en kw : 
+```{r}
+ 
+data%>%
+select(built_year, kw, sourcing_country)%>%
+filter(!is.na(built_year),sourcing_country== "USA")%>%
+mutate(kind1 = case_when(built_year >1993 ~ "New"))%>%
+count(kind1, kw, sourcing_country)%>%
+  summarise(sd(kw))
+```
+en chevaux : 
+```{r}
+ 
+data%>%
+select(built_year, horsepower, sourcing_country)%>%
+filter(!is.na(built_year),sourcing_country== "USA")%>%
+mutate(kind1 = case_when(built_year >1993 ~ "New"))%>%
+count(kind1, horsepower, sourcing_country)%>%
+  summarise(sd(horsepower))
+```
+
+
+ Question 4 : 
+ 
+ 
+1-créer une nouvelle variable qui précise le nombre de jours nécessaires pour la vente du véhicule : 
+
+ 
+```{r}
+data%>%
+  select(bought_date, sold_date)%>%
+  mutate(selling_period=sold_date-bought_date)
+```
+
+
+ 2- la moyenne de cette variable et son écart type : 
+ 
+```{r}
+data%>%
+  select(bought_date, sold_date)%>%
+  mutate(selling_period=sold_date-bought_date)%>%
+  summarise(moyenne =mean(selling_period, na.rm =TRUE), écart_type =sd(selling_period , na.rm = TRUE))
+
+```
+ 
+ 3- le sommaire statistique pour le cas du premeir type et deuxième type de vente : 
+ 
+ 
+```{r}
+ data%>%
+   select(sales_channel)%>%
+   filter(sales_channel== "auction_type1")%>%
+   count(sales_channel)%>%
+   summary(sales_channel)
+```
+
+
+
+
+```{r}
+ data%>%
+   select(sales_channel)%>%
+   filter(sales_channel== "auction_type2")%>%
+   count(sales_channel)%>%
+   summary(sales_channel)
+```
+
+4- 
+
+le type de vente qui permet de vendre un véhicule  le plus rapidement : est le type 1 car ça moyenne  est la plus élvée donc il est préférable par les societés de vente . 
+
+ 5- l’origine du véhicule qui permet une vitesse de vente plus rapide dans le site :
+ 
+```{r}
+data%>%
+  select(sourcing_country, bought_date, sold_date)%>% 
+  mutate(selling_period=sold_date-bought_date)%>%
+  arrange(selling_period)%>%
+  slice(1)
+```
+ 
+ 
+ Question 5 : 
+ 
+1-  la corrélation entre le prix de vente et le nombre de jour jusqu’à la vente : 
+
+
+```{r}
+data%>%
+  select(buy_price, bought_date, sold_date)%>% 
+  mutate(selling_period=sold_date-bought_date)%>%
+  summarise(cor.test=c(buy_price,selling_period))
+```
+*il existe une forte corrélation entre le prix de vente et la periode de vente .
+
+ 
+2- la corrélation entre le prix de vente et la puissance:
+
+```{r}
+data%>%
+  select(buy_price, kw)%>%
+  summarise(cor.test=c(buy_price,kw))
+```
+*il exicte une faible corrélation entre le prix de vente et la puissance :
+
+
+3-la corrélation entre toutes les variables numériques: 
+
+
+```{r}
+data%>%
+  select(buy_price, kw,sold_date,bought_date,built_year,,mileage)%>%
+  summarise(cor.test=c(buy_price, kw,sold_date,bought_date,built_year,mileage))
+
+```
+
+
+fin . 
+
+

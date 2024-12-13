@@ -1,0 +1,695 @@
+---
+title: "Examen 2023"
+output: html_document
+date: "2023-01-27"
+L'étudiante : " Djeraf Achwak " groupe 06 
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
+
+```{r}
+library(tidyverse)
+data <- read_csv("data.csv.csv")
+```
+ QUESTION 01 :
+ 
+1) le nombre de lignes de cette base de données : 
+
+```{r}
+glimpse(data)
+```
+#le nombre de lignes dans cette base de donnés : 20640 Lignes 
+
+2-  le sommaire statistiques des variables numériques : 
+
+
+```{r}
+data %>% 
+  select(-ocean_proximity)%>%
+  summary()
+  
+```
+
+
+
+3)  les différentes catégories des variables catégorielles : 
+ y a des variables numiriques et des variables qualitatives 
+ 
+ 
+
+ les variables qui contiennent des valeurs manquantes et le nombre pour chacune de ses variables : 
+
+ Pour répondre à cette question on peut utiliser **summary** et  on cherche  manuellement les variables qui  continet de valeurs manquantes et combient de Na 
+
+ 
+
+```{r}
+summary(data)
+  
+
+```
+
+#on a trouvé que la seule variable qui contient des variables manquantes c'est Total_bedrooms eST  il y a 207 Na's . 
+
+
+  5) le nombre de valeurs manquantes est considérable : 
+#non , 
+#justification : le nombre de valeur manquantes et négligeable devant les observations de la data . 
+  
+  
+  
+"Question 02": 
+
+
+```{r}
+set.seed(as.numeric("20330443"))
+data <- data %>%
+slice_sample(n = 5000)
+```
+
+#Expliquons que fait ce code exactement : 
+ce code aide à prendre un échantillon aléatoir de "n" observation de la base de donnéé 
+
+#le role principale de cette opération : 
+c'est de tirer 5000 observations d'une base de donnée qui contient 20640 Obs , chaque étudiant aura un échantillon de 5000 Obs liées a son matricule . 
+
+ _ _ _ _ _ _ _ _ _ __ _  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+Question 03 : 
+
+
+ 1) les sommaires statistiques pour les variables numériques: 
+
+```{r}
+data %>% 
+  select(-ocean_proximity)%>%
+  summary()
+```
+ 
+ 2) 
+#oui il y a une difference entre le premier résultat et celui ci causé par le changement de la data de 20640 obs à  5000 obs 
+
+ 3- tracage l’histogramme de chaque variable numérique : 
+ 
+```{r}
+data %>%
+  ggplot(aes(x = longitude)) +
+  geom_histogram(fill = "lightpink1", col = "black")+
+  labs(title = "histogramme de  longitude" )
+```
+#interprétation = 
+LA carte de la Californie situé  (-122.5° ;-115°) est oust  
+
+```{r}
+data %>%
+  ggplot(aes(x = latitude)) +
+  geom_histogram()+
+  labs(title = "histogramme de latitude ")
+```
+
+#la carte de la californie situe 32.5 ° SUD ET 40 ° nord
+
+```{r}
+data %>%
+  ggplot(aes(x = total_rooms)) +
+  geom_histogram()+
+  labs(title = "histogramme de nombre total de chambres ")
+```
+ 
+
+```{r}
+data %>%
+ggplot(aes(x = housing_median_age)) +
+  geom_histogram()+
+  labs(title = "histogramme del’age médiane des maisons dans cette rue  ")
+```
+
+
+```{r}
+data %>%
+ggplot(aes(x = total_bedrooms)) +
+  geom_histogram()+
+  labs(title = "nombre total de chambres")
+```
+ 
+ 
+```{r}
+data %>%
+ggplot(aes(x = population)) +
+  geom_histogram()+
+  labs(title = "nombre total de la population de cette rue")
+```
+ 
+```{r}
+data %>%
+ggplot(aes(x = households)) +
+  geom_histogram()+
+  labs(title = "nombre totales des ménages dans cette rue")
+```
+ 
+```{r}
+data %>%
+ggplot(aes(x = median_income)) +
+  geom_histogram()+
+  labs(title= "le revenu médian des ménages dans cette rue (mesuré en 10000$)")
+```
+ 
+```{r}
+data %>%
+ggplot(aes(x = median_house_value)) +
+  geom_histogram()+
+  labs(title = "valeur médiane de la maison dans cette rue (mesuré en $)")
+```
+ 
+4)  une méthode pour dessiner les histogrammes de toutes les variables en un seul
+graphique :
+
+```{r}
+data %>%
+   keep(is.numeric)%>%
+   gather()%>%
+   ggplot(aes(value))+
+    facet_wrap(~ key, scales = "free")+
+  geom_histogram()
+     
+```
+
+la méthode de patchwork : 
+
+
+
+
+
+ 6-Analaysons les variables individuellement  de détecter d’éventuelles anomalies : 
+  
+  
+```{r}
+data %>%
+  ggplot(aes(y= latitude))+
+  geom_boxplot()
+```
+#pas de anomalie dans cette variable  . 
+
+```{r}
+data %>%
+  ggplot(aes(y= longitude))+
+  geom_boxplot()
+```
+
+#pas d'anomalie ici
+
+
+```{r}
+data %>%
+  ggplot(aes(y= households))+
+  geom_boxplot()
+```
+# y a des anomalies dans cette variable entre 4000 ET 5000 
+```{r}
+data %>%
+  ggplot(aes(y= housing_median_age))+
+  geom_boxplot()
+```
+#PAS D'ANOMALIE DANS CETTE VARIABLE 
+
+
+```{r}
+data %>%
+  ggplot(aes(y= median_house_value))+
+  geom_boxplot()
+```
+Y a des anomalies PROCHE DE  5e+05
+
+
+
+```{r}
+data %>%
+  ggplot(aes(y= median_income))+
+  geom_boxplot()
+```
+#IL YA DES ANOMALIES ENTRE 10 ET 15 
+
+```{r}
+data %>%
+  ggplot(aes(y= population))+
+  geom_boxplot()
+```
+#IL existe des anomalies de 7000 Jusqu'à 15000 
+
+```{r}
+data %>%
+  ggplot(aes(y= total_rooms))+
+  geom_boxplot()
+
+```
+#IL existe des anomalies entre 17000 ET 30000  
+
+```{r}
+data %>%
+  ggplot(aes(y= total_bedrooms))+
+  geom_boxplot()
+```
+#IL Existe des anomalies entre 1200 jusqu'au 5000 .   
+ ----------------------------------------------------------------------------------------------------------------
+ 
+#Question 4 :
+ 
+ 1- l’age médian des maisons dans toute la californie :
+ 
+
+```{r}
+data %>%
+  count(housing_median_age)
+```
+#il ya 1237 maisons avec un l'age median de 52 
+
+ 2- calculons la médiane de la valeur des maisons californiennes proche de l’océan pour les ménage avec revenu
+moins de 45000$ :
+
+
+```{r}
+data %>%
+  select(ocean_proximity, median_income , median_house_value)%>%
+  filter(ocean_proximity == "NEAR BAY", median_income< 4.5000)%>%
+  summarise(median=median(median_house_value , na.rm = TRUE))
+
+```
+#LA MEDIANE DE LA VALEUR DE MAISON CALIFORNIENNES PROCHES DE L4OCEAN EST 188900
+3)  la variance et l’écart type du nombre de chambres des rues californiennes pour les rues avec
+population supérieur à 10000 personnes et qui sont moins 1h de l’océan 
+
+```{r}
+data %>%
+  select(total_rooms, ocean_proximity , population)%>%
+  filter(ocean_proximity=="<1H OCEAN", population>10000)%>%
+  summarise(variance=var(total_rooms, na.rm = TRUE))
+```
+
+# la variance est : 51630605
+
+```{r}
+data %>%
+  select(total_rooms, ocean_proximity , population)%>%
+  filter(ocean_proximity=="<1H OCEAN", population>10000)%>%
+  summarise(lecartpe=sd(total_rooms, na.rm = TRUE))
+```
+l'écartype : 7185.444. 
+
+
+4)  la fréquence (le nombre de rues) et la fréquence relative des rues ayant un revenu médian entre
+25000 et 45000 dollars et qui ait le nombre totale de chambres (tous inclus) supérieur à 500 : 
+
+la fréquence : 
+
+```{r}
+data %>%
+  select(total_rooms, median_income)%>%
+  filter(total_rooms>500 , median_income>=2.5000 ,
+         median_income<=4.5000)%>%
+  summarise(fréquence= n(), fréquence_relative= n()/nrow(data)*100)
+```
+
+fréquence_relative : 46.45833	
+
+5) l’erreur absolue moyenne de nombre de chambres (chambres seulement) pour chacune des
+catégories des maisons par rapport à leurs proximité à l’océan : 
+
+
+```{r}
+mae <- function(x){
+médiane = median(x, na.rm = TRUE)
+m <- sum(abs(x- médiane), na.rm = TRUE)
+mae <- m/nrow(data)
+return(mae)
+}
+
+data %>%
+  group_by(ocean_proximity)%>%
+summarise(mae = mae(total_bedrooms))
+```
+’erreur absolue moyenne = 
+<1H OCEAN	111.25450581			
+INLAND	84.52882752			
+ISLAND	0.03071705			
+NEAR BAY	26.39878876			
+NEAR OCEAN	30.38343023	
+
+ 6) les déciles des ménages pour les rues proche de la baie (bay) et avec population supérieur à 1000 : 
+ 
+ 
+```{r}
+data %>%
+  select(population,ocean_proximity,households)%>%
+  filter(ocean_proximity =="NEAR BAY", population> 1000 )%>%
+  summarise(décile = quantile(households, na.rm = TRUE, probs = 0.10))
+```
+  la proba de 10%des ménages pour les rues proche de la baie est 377  
+
+ 7)  les 30%,60% et 85% quantiles des valeurs des maisons pour les rues avec un nombre de ménage
+inférieur à 100 : 
+
+```{r}
+data %>%
+  select(median_house_value,households)%>%
+  filter(households<100 )%>%
+  summarise(quantile = quantile(median_house_value, na.rm = TRUE, probs = c(0.30, 0.60 , 0.85 )))
+```
+100000  30%				
+172340	60%			
+330000	85%
+
+
+ 8) calculer les quartiles des valeurs des maisons pour chaque proximité de l’océan :
+
+```{r}
+data %>%
+  group_by(ocean_proximity)%>%
+  summarise(quartile = quantile(median_house_value, na.rm = TRUE, probs= c(0.25 , 0.50,0.75)))
+```
+
+
+#QUESTION 05  : 
+
+
+1)-le nuage de points de latitude vs longitude : 
+
+
+```{r}
+data%>%
+  ggplot(aes(x=longitude, y=latitude))+
+  geom_point(size=2, col = "brown")+
+  labs(title = "latitude vs longitude")
+```
+#remarque : le graphe exprime la distribution des maison dans la calofornie . 
+
+2)
+#comparaison : 
+le nuage de point ressemble à la carte de la Californie , 
+
+
+3) il y a une fréquence plus élvée dans le coté sud-est et nord-Oust 
+il y a une fréquence moins élvée dans le milieu 
+
+
+4) le même nuage de points de la question 5.1  colorer par la proximité de l’océan : 
+
+
+```{r}
+data %>%
+group_by(ocean_proximity)%>%
+ggplot(aes(x =latitude , y =longitude , col = ocean_proximity)) +
+geom_point()+
+  labs(title = "latitude et longitude avec la proximité à l'ocean" )
+```
+
+5) le même nuage de points de la question 5.1 et colorer par la valeur des maisons : 
+
+
+```{r}
+data %>%
+group_by(median_house_value)%>%
+ggplot(aes(x =latitude , y =longitude , col = median_house_value)) +
+geom_point()+
+  labs(title = "latitude et longitude avec la valeur des maisons ")
+```
+#explication de graphe : 
+
+on remarque que dans ce graphe la valeur des maisons varie selon localisation dans la carte de la Californie , 
+on constate que la valeur plus élvée est pour les maison dans la borne oust, et la fréquence moins élvée pour la borne est , 
+
+
+#la difference entre les deux graphes est : 
+#les deux nuage des points ont la meme forme , on trouve que plus les maison se prochent de l'océan , leur valeur augmente 
+
+
+une méthode pour combiner les deux graphes  :
+
+
+```{r}
+library(patchwork)
+```
+
+```{r}
+p1 <-data%>%
+ group_by(ocean_proximity)%>%
+ ggplot(aes(x =latitude , y =longitude , col = ocean_proximity)) +
+ geom_point()
+p2 <-data%>%
+ group_by(median_house_value)%>%
+ ggplot(aes(x =latitude , y =longitude , col = median_house_value)) +
+ geom_point() 
+p1+p2
+  
+```
+
+7* créeation une nouvelle variable.”coté”: 
+
+
+```{r}
+
+  
+
+```
+
+#Question 06 : 
+
+
+1) un graphique de de la distribution de la proximité à l’océan : 
+   
+   
+```{r}
+data %>%
+  count(ocean_proximity)%>%
+  ggplot(aes(ocean_proximity, y= n))+
+  geom_col()+
+  labs(title = "laproximité a l'océan ")
+```
+ la fréquence la plus élvée dans le graph est <1H OCEAN et la plus petit est de ISLAND 
+ 
+2* boite à moustaches des nombres de chambres :
+ 
+ 
+```{r}
+data %>%
+  ggplot(aes(Y= total_rooms)) +
+  geom_boxplot()+
+  labs(title = "le nombre total des chambres ")
+```
+
+EXISTE DES ANOMALIES 
+```{r}
+data %>%
+  ggplot(aes(y= total_bedrooms)) +
+  geom_boxplot()+
+  labs(title ="total bedrooms")
+```
+
+existe des anomalies 
+
+
+3) la boite à moustaches des nombres de chambres en distinguant les différentes proximités à l’océan :
+
+
+```{r}
+data %>%
+  group_by(ocean_proximity)%>%
+  ggplot(aes(x= ocean_proximity , y=total_rooms )) +
+  geom_boxplot()+
+  labs(title = "totale chambres avec la proximité à l'ocean ")
+```
+
+  4) l’histogramme et la densité du revenu médian en distinguant entre les différents cotés de la californie
+ (si la variable n’est pas été crée utiliser la proximité à l’océan)
+
+ 
+```{r}
+data %>%
+  group_by(ocean_proximity)%>%
+  ggplot(aes(x= median_income , col = ocean_proximity))+
+  geom_histogram()+
+  labs(title= "la densité de revenue median avec la proximité a l'océan" )
+```
+#le revenue plus élvée est de <1H OCEAN et le moins élvée est de near ocean 
+
+
+```{r}
+data %>%
+  group_by(ocean_proximity)%>%
+  ggplot(aes(x= median_income , col = ocean_proximity))+
+  geom_density()
+```
+
+#le revenue plus élvée est de <1H OCEAN et le moins élvée est de near ocean
+
+5) le nuage de points de la valeur médiane de la maison vs l’age des maisons : 
+
+
+```{r}
+data%>%
+  ggplot(aes(x= housing_median_age , y= median_house_value))+
+  geom_point()+
+  labs(title = "la valeur médiane de la maison vs l’age des maisons")
+```
+
+
+6)le nuage de point précédent en distinguant entre la proximité à l’océan : 
+
+```{r}
+data%>%
+  group_by(ocean_proximity)%>%
+  ggplot(aes(x= housing_median_age , y= median_house_value , col= ocean_proximity))+
+  geom_point()+
+  labs(title = "la valeur médiane de la maison vs l’age des maisonsa avec la proximité à l'océan")
+```
+#commentaire : la valeur des maison plus élvée est de <1H OCEAN ET NEAR OCEAN sans prendre on cosédiration l'age median de maison 
+
+7)tracer le nuage de points de la valeur médiane de la maison vs nombre de chambres :
+```{r}
+data %>%
+  ggplot(aes(x = total_rooms, y= median_house_value))+
+  geom_point()+
+  labs(title = "la valeur médiane de la maison vs nombre de chambres")
+```
+
+```{r}
+data %>%
+  group_by(ocean_proximity)%>%
+  ggplot(aes(x = total_rooms, y= median_house_value , col= ocean_proximity))+
+  geom_point()+
+  labs(title = "la valeur médiane de la maison vs nombre de chambres avec la proximité à l'océan ")
+```
+
+```{r}
+data %>%
+  ggplot(aes(x = total_bedrooms, y= median_house_value))+
+  geom_point()+
+  labs(title = " la valeur médiane de la maison vs nombre de chambres  ")
+```
+
+
+```{r}
+data %>%
+  group_by(ocean_proximity)%>%
+  ggplot(aes(x = total_bedrooms, y= median_house_value , col= ocean_proximity))+
+  geom_point()+
+  labs(title = "la valeur médiane de la maison vs nombre de chambres avec la proximité a l'océan ")
+```
+
+le nuage de points de population vs ménage : 
+
+```{r}
+data %>%
+  ggplot(aes(x = households, y = population))+
+  geom_point()+
+  labs(title=(" population vs ménage  "))
+```
+# commenteraire : le nombre des ménages est un quard de la population 
+
+
+
+
+ QUSTUION 07 : 
+ 
+1- la corrélation entre la valeur médiane de la maison et les autres variables numériques:
+
+```{r}
+data%>%
+  select(median_house_value,longitude )%>%
+  summarise(cor.test=c(median_house_value,longitude))
+```
+#forte corrélation 
+
+
+```{r}
+data%>%
+  select(median_house_value,latitude )%>%
+  summarise(cor.test=c(median_house_value,latitude))
+
+```
+
+#forte corrélation 
+
+```{r}
+data%>%
+  select(median_house_value,housing_median_age )%>%
+  summarise(cor.test=c(median_house_value, housing_median_age))
+```
+#forte corrélation 
+
+```{r}
+data%>%
+  select(median_house_value,total_rooms)%>%
+  summarise(cor.test=c(median_house_value,total_rooms))
+```
+
+#forte corrélation 
+```{r}
+data%>%
+  select(median_house_value,total_bedrooms )%>%
+  summarise(cor.test=c(median_house_value,total_bedrooms))
+```
+#forte corrélation 
+
+```{r}
+data%>%
+  select(median_house_value,population )%>%
+  summarise(cor.test=c(median_house_value, population))
+```
+
+#forte corrélation 
+```{r}
+data%>%
+  select(median_house_value, median_income)%>%
+  summarise(cor.test=c(median_house_value ,median_income ))
+```
+
+#forte corrélation 
+
+```{r}
+data%>%
+  select(median_house_value,households)%>%
+  summarise(cor.test=c(median_house_value, households))
+```
+#forte corrélation 
+ le sommaire statistique de la médiane de la valeur de la maison par
+rapport à la proximité à l’océan : 
+
+```{r}
+data%>%
+  group_by(ocean_proximity)%>%
+  select(median_house_value,ocean_proximity)%>%
+  summary()
+```
+  
+
+
+
+
+
+

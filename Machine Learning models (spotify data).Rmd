@@ -1,0 +1,953 @@
+---
+title: "ML_EXAM"
+author: "Achwaq DJERAF"
+output: html_document
+date: "2024-06-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+##################################################################################################################
+
+
+
+
+#Part 1 :
+
+#Q1. read the dataset “data_final.csv” attached with this document.
+
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+```
+
+```{r}
+spoty <- data_final 
+```
+
+
+#Q2. explore the dataset and precise the number variable of each type.  
+
+
+```{r}
+glimpse(spoty)
+```
+```{r}
+count_class<-spoty %>% count(class)
+count_class
+```
+
+```{r}
+spoty_types_count <- table(sapply(spoty,class))
+spoty_types_count
+```
+
+#Exploring Data 
+
+ #Observations:
+ 
+# we can observe that our data spoty contains 19 features and the target variable class 
+# also our data contains 148,711 observations .
+
+*There are total of 20 columns : 11 continous , 5 categorical and 4 integer
+*class column is the target variable which is contain 4 classes : high,low,medium,popular
+
+
+** There are a number of features with values between approximately 0 and 1; such as acousticness, danceability, liveness ,speechiness and valence
+
+*All of loudness values are negative.
+*The variable mode seems even more of a binary feature.
+*The categorical variables are : artist name,track name,track id ,genre
+
+ 
+```{r}
+summary(spoty)
+```
+#summary shows the range and quartile measures for each variable. It also gives  the number of missing values, and the value counts for categoricals variables 
+
+
+
+Is there any missing values ????
+
+#check for missing values :  
+
+```{r}
+  sum(is.na(spoty))
+```
+# there is no missing values in our data spoty 
+
+
+##########################################################################################################
+
+
+#Part 2 : Data exploration:
+
+Q1. replicate the plots in the step 1 of paper exam (see attached paper exam)
+Q2. Perform a univariate analysis of each variable of the dataset.
+Q3. Perform a bivariate analysis by analysing the relationship between variables and especially the relationship
+with the target variable.
+
+```{r}
+spoty %>%
+ggplot(aes(x = class, fill = class)) +
+geom_bar() +
+theme_bw()
+```
+# it's apear that the higher count relate to the low popularity class of songs and the smallest is the high class
+
+# this kind of plot doesn’t really look good if there are too many rows. Thus, we sample 30% of our data for a quick overview.
+
+```{r}
+sampled_spoty<- spoty%>% 
+  sample_frac(0.3)
+sampled_spoty
+```
+ 
+ 
+```{r}
+spoty1<- spoty[,-1]
+```
+
+i removed the variable id to get the same correlation matrix with you 
+then Select only numeric columns for correlation
+
+```{r}
+numeric_data <- spoty1[sapply(spoty1, is.numeric)]
+
+corr_matrix <- cor(numeric_data)
+
+op <- par(no.readonly = TRUE) 
+layout(matrix(1:1, nrow = 1))
+par(mar = c(5, 5, 4, 2) + 0.1)
+
+
+image(1:nrow(corr_matrix), 1:ncol(corr_matrix), t(corr_matrix),
+      col = colorRampPalette(c("blue", "white", "red"))(20), 
+      axes = FALSE, xlab = "", ylab = "")
+par(mar = c(5, 2, 4, 2) + 0.1)
+
+axis(1, at = 1:nrow(corr_matrix), labels = names(numeric_data), cex.axis = 0.7, las = 2)
+axis(2, at = 1:ncol(corr_matrix), labels = names(numeric_data), cex.axis = 0.7, las = 2)
+
+```
+we find : 
+'loudness' and 'energy' are highly positvely corr 
+'valensce' and 'danceability' possitvelly corr
+'accoustisness' with 'loudness' negativelly corr also with 'energy' 
+'instrumentelness' corr negativelly with ' loudness' 
+
+
+```{r}
+op1 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = acousticness)) +
+  geom_boxplot(fill = "skyblue", alpha = 0.7) +
+  labs(x = "Popularity Class", y = "Acousticness") +
+  theme_minimal()
+
+op2 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = danceability)) +
+  geom_boxplot(fill = "red", alpha = 0.7) +
+  labs(x = "Popularity Class", y = "danceability") +
+  theme_minimal()
+
+op3 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = duration_ms)) +
+  geom_boxplot(fill = "green", alpha = 0.7) +
+  labs(x = "Class", y = "duration_ms") +
+  theme_minimal()
+
+op4 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = energy)) +
+  geom_boxplot(fill = "pink", alpha = 0.7) +
+  labs(x = "Class", y = "energy") +
+  theme_minimal()
+
+op5 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = instrumentalness)) +
+  geom_boxplot(fill = "orange", alpha = 0.7) +
+  labs(x = "Class", y = "instrumentalness") +
+  theme_minimal()
+
+op6 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = key)) +
+  geom_boxplot(fill = "purple", alpha = 0.7) +
+  labs(x = "Class", y = "key") +
+  theme_minimal()
+
+op7 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = liveness)) +
+  geom_boxplot(fill = "lightblue", alpha = 0.7) +
+  labs(x = "Class", y = "liveness") +
+  theme_minimal()
+
+
+op8 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = loudness)) +
+  geom_boxplot(fill = "darkred", alpha = 0.7) +
+  labs(x = "Class", y = "loudness") +
+  theme_minimal()
+
+op9 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = mode)) +
+  geom_boxplot(fill = "orange4", alpha = 0.7) +
+  labs(x = "Class", y = "mode") +
+  theme_minimal()
+
+op10 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = speechiness)) +
+  geom_boxplot(fill = "yellow4", alpha = 0.7) +
+  labs(x = "Class", y = "speechiness") +
+  theme_minimal()
+
+op11 <- spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = tempo)) +
+  geom_boxplot(fill = "darkgreen", alpha = 0.7) +
+  labs(x = "Class", y = "tempo") +
+  theme_minimal()
+
+op12 <- spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = time_signature)) +
+  geom_boxplot(fill = "red", alpha = 0.7) +
+  labs(x = "Class", y = "time_signature") +
+  theme_minimal()
+
+op13 <-  spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(x = class, y = valence)) +
+  geom_boxplot(fill = "yellow", alpha = 0.7) +
+  labs(x = "Class", y = "valence") +
+  theme_minimal()
+
+design <- "
+ABC
+DEE
+FFG
+HIJ
+KLM
+"
+
+op1 + op2 + op3 + op4 + op5 + op6 + op7 + op8 + op9 + op10 + op11 + op12 + op13 +
+  plot_layout(design = design) +
+  plot_annotation(title = 'OUTLAYERS PLOT')
+
+```
+# there are two types of outlayers : 
+
+significant outlyr : in loudness , speechness , liveness....
+non significant outlyr : ms_duration , time_signature ....wh have to remove this outlayers by scalling 
+
+
+#Q2. Perform a univariate analysis of each variable of the dataset.
+
+```{r}
+library(patchwork)
+```
+
+
+```{r}
+library(patchwork)
+```
+
+
+```{r}
+p1 <- spoty %>%
+  sample_frac(0.3) %>%
+  ggplot(aes(duration_ms)) +
+  geom_density(fill = "blue") +
+  theme_minimal() +
+  labs(x = "Duration (ms)", y = "Density", title = "Distribution of Song Duration")
+
+
+p2 <- spoty %>%
+  sample_frac(0.3)%>% 
+  ggplot(aes(acousticness)) +
+  geom_density(fill = "orange", bw = 0.01) +
+  theme_minimal() +
+  labs(x = "Acousticness",y = "Density", title = "Acousticness")
+
+p3 <- spoty %>%
+  sample_frac(0.3)%>% 
+  ggplot(aes(danceability)) +
+  geom_density(fill = "red") +
+  theme_minimal() +
+  labs(x = "danceability",y = "Density", title = "Danceability")
+
+p4 <- spoty %>%
+  sample_frac(0.3)%>% 
+  filter(!is.na(energy)) %>%
+  ggplot(aes(energy)) +
+  geom_density(fill = "darkgreen") +
+  theme_minimal() +
+  labs(x = "", title = "Energy")
+
+p5 <- spoty %>%
+  sample_frac(0.3)%>%
+  filter(instrumentalness > 0) %>% 
+  ggplot(aes(instrumentalness)) +
+  geom_density(fill = "violet") +
+  scale_x_continuous(trans = "log") +
+  theme_minimal() +
+  labs(x = "instrumentalness",y = "Density", title = "Instrumentalness (log transform)")
+
+p6 <- spoty %>%
+  sample_frac(0.3)%>%
+  count(key) %>% 
+  ggplot(aes(key, n, fill = key)) +
+  geom_col() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(x = "key", title = "Key")
+
+
+p7 <- spoty %>%
+  sample_frac(0.3)%>% 
+  ggplot(aes(liveness)) +
+  geom_density(fill = "purple") +
+  theme_minimal() +
+  labs(x = "liveness",y = "Density", title = "Liveness")
+
+
+p8 <- spoty %>%
+  sample_frac(0.3)%>%
+  ggplot(aes(loudness)) +
+  geom_density(fill = "lightblue") +
+  theme_minimal() +
+  labs(x = "loudness",y = "Density", title = "Loudness")
+
+p9 <- spoty %>%
+  sample_frac(0.3)%>%
+  count(mode) %>% 
+  ggplot(aes(mode, n, fill = as.factor(n))) +
+  geom_col() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(x = "mode", title = "Audio Mode")
+
+p10 <- spoty %>%
+  sample_frac(0.3)%>% 
+  ggplot(aes(speechiness)) +
+  geom_density(fill = "darkred") +
+  theme_minimal() +
+  labs(x = "speechiness",y = "Density", title = "Speechiness")
+
+p11 <- spoty %>%
+  sample_frac(0.3)%>% 
+  ggplot(aes(tempo)) +
+  geom_density(fill = "orange4") +
+  theme_minimal() +
+  labs(x = "tempo",y = "Density", title = "Tempo")
+
+p12 <- spoty %>%
+  sample_frac(0.3)%>% 
+  count(time_signature) %>% 
+  ggplot(aes(time_signature, n, fill = time_signature)) +
+  geom_col() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(x = "time_signature",y = "Density", title = "Time signature")
+
+p13 <- spoty %>%
+  sample_frac(0.3)%>% 
+  ggplot(aes(valence)) +
+  geom_density(fill = "yellow4") +
+  theme_minimal() +
+  labs(x = "valence",y = "Density",title = "Audio Valence")
+
+combined_plot <- p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 +
+  plot_layout(design = design) +
+  plot_annotation(title = 'Song Popularity Features')
+
+print(combined_plot)
+
+```
+
+
+```{r}
+p1 + p2 + p3 + p4 + p5 + p6 + p7 
+```
+
+
+```{r}
+p8 + p9 + p10 + p11 + p12 + p13
+```
+
+We find:
+
+Our initial impressions of the data types have largely been confirmed: audio_mode is a boolean feature, and time_signature and key are ordinal (or integer)
+
+A number of features are bounded between 0 and 1: accosticness, danceability, energy, liveliness, speechiness, and audio_valence.
+
+
+
+Q3. Perform a bivariate analysis by analysing the relationship between variables and especially the relationship
+with the target variable.
+
+#1 Target Impact
+
+```{r}
+spoty %>% 
+  sample_frac(0.3)%>%
+  select(where(is.numeric), class, -id) %>% 
+  drop_na() %>% 
+  filter(instrumentalness > 0) %>% 
+  mutate(instrumentalness = log10(instrumentalness)) %>% 
+  pivot_longer(cols = -class, names_to = "type", values_to = "value") %>% 
+  ggplot(aes(value, fill = class)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ type, scales = "free") +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  labs(title = "Target impact - numerical features")
+```
+
+
+
+
+```{r}
+spoty %>%
+  drop_na() %>%
+  select(mode, key, time_signature, class) %>%
+  mutate(mode = as.factor(as.numeric(mode))) %>%
+  pivot_longer(
+    c(-class), 
+    names_to = "type", 
+    values_to = "value",
+    values_transform = list(value = as.character) # Convert all values to character
+  ) %>%
+  mutate(type = fct_relevel(as.factor(type), c("mode", "time_signature", "key"))) %>%
+  ggplot(aes(value, fill = class)) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~ type, scales = "free", nrow = 2) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  labs(title = "Target impact - categorical features ")
+```
+we can see clearer the imbalance between the classes of popularity songs for all realisations of all features
+
+# feature interactions
+
+```{r}
+spoty %>% 
+  drop_na() %>% 
+  ggplot(aes(energy, fill = as.factor(time_signature))) +  
+  geom_density(alpha = 0.5, bw = 0.03) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+#We find:
+
+we can see bigdifferences between the two densities : the energy peaks for time_signature = 2 vs 4.
+small diffrence for the other peaks 
+
+
+```{r}
+spoty %>% 
+  drop_na() %>% 
+  ggplot(aes(loudness, fill =as.factor(mode))) +  
+  geom_density(alpha = 0.5, bw = 0.03) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+## similair densities between loudness and mode  
+
+```{r}
+str(spoty)
+```
+
+Part 3 : Unsupervised Learning
+# dataset containing all variables necessary of an unsupervised learning analysis: 
+
+Numeric features: “danceability,” “energy” ,” “speechiness,” “acousticness,” “instrumentalness,” “liveness,” “valence,” “tempo,” and “duration_ms,“time_signature,”
+Categorical features: “genre,” “mode,” ” and “key.”
+We’ll exclude the non-informative features (“id,” “artist_name,” “track_name,” “track_id,” and “year”) and the target variable (“class”).
+
+
+```{r}
+spoty_model1 <- subset(spoty, select = -c(1:4,genre,class))
+```
+
+
+```{r}
+spoty_model1
+```
+
+the dimenstions of the new data are : 14 features and 148,711 rows 
+
+#scalling: 
+```{r}
+spoty_stand <- spoty_model1 %>% mutate_all(~scale(.) %>% as.vector())
+```
+
+
+```{r}
+summary(spoty_stand)
+```
+
+```{r}
+str(spoty_stand)
+```
+
+
+# Perform a dimensionality reduction analysis :
+
+```{r}
+library(tidytext)
+library(Rtsne)
+library(embed)
+```
+
+
+```{r}
+set.seed(42)
+```
+
+#PCA Recipe
+```{r}
+pca_rec <- recipe(~., data = spoty_stand) %>% 
+  step_pca(all_predictors())
+pca_rec
+```
+
+```{r}
+pca_prep <- prep(pca_rec)
+pca_prep
+```
+
+```{r}
+tidied_pca <- tidy(pca_prep, 1)
+tidied_pca
+```
+
+
+#Filtering and Visualizing PCA Components
+```{r}
+tidied_pca %>%  
+  filter(
+    component == "PC1" |
+    component == "PC2" |
+    component == "PC3" |
+    component == "PC4"
+   ) %>% 
+  mutate(component = fct_inorder(component)) %>%  
+  ggplot(aes(value, terms, fill = terms)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~component, nrow = 1) +
+  labs(y = NULL) +
+  theme_bw()
+```
+
+#loudenss and energy contribute positively (most contibution) with pc1  and acoustisness contibute negatively 
+# pc2 :valence and daceability are  the most positive contibution
+# Pc 3: speecheneess and liveness contibute negatively 
+# Pc 4 : mode with + contr and  key with - contr 
+
+
+```{r}
+tidied_pca %>%  
+  filter(component %in% paste0("PC", 1:2)) %>% 
+  group_by(component)  %>% 
+  top_n(14, abs(value)) %>% 
+  ungroup() %>% 
+  mutate(terms = reorder_within(terms, abs(value), component)) %>% 
+  ggplot(aes(abs(value), terms, fill = value > 0)) +
+  geom_col() +
+  facet_wrap(~component, scales = "free_y") +
+  scale_y_reordered() +
+  labs(
+    x = "Absolute value of contribution",
+    y = NULL, fill = "Positive?"
+  ) 
+```
+#this plot prove what's we said about contribution 
+we got the pc1 and pc2 : they cover ma the information (variables) 
+
+
+```{r}
+pca_prep %>% juice()
+```
+#K-means model to make a segmentation :
+
+```{r}
+pca_km <- k_means(num_clusters = 3) %>%
+set_engine("stats") %>%
+set_mode("partition")
+```
+
+```{r}
+pca_km
+```
+
+```{r}
+library(tidyclust)
+```
+
+```{r}
+pca_data <- juice(pca_prep)
+
+# Apply K-means clustering
+pca_km <- kmeans(pca_data[, 1:2], centers = 3)  # K-means on the first 2 PCs
+
+# Add cluster labels to the PCA data
+pca_data$Cluster <- as.factor(pca_km$cluster)
+
+# Plot PCA with clusters
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Cluster)) +
+  geom_point(size = 3) +
+  labs(title = "K-means Clustering on PCA-reduced Data",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  theme_minimal() +
+  scale_color_manual(values = c("blue", "green", "red"))  # Customize colors as needed
+```
+
+
+
+#Red cluster : Energetic and Danceable Cluster: This cluster represent songs with high danceability, energy, and loudness. 
+
+#Green cluster : Acoustic and Reflective Cluster: In this cluster, It may represent more acoustic or instrumental music.
+
+#Blue cluster: Instrumental and Calm cluster 
+
+
+```{r}
+clustered_data <- bind_cols(spoty, Cluster = pca_data$Cluster)
+
+# Calculate the mean of each feature for each cluster
+cluster_summary <- clustered_data %>%
+  group_by(Cluster) %>%
+  summarise_all(mean)
+
+print(cluster_summary)
+```
+
+
+
+```{r}
+str(clustered_data)
+```
+
+
+```{r}
+summary(clustered_data)
+```
+
+
+
+#Part 4 : Supervised Learning 1 : replicate exam:
+
+Q1. use a seed of (13) and split the data set into train and test (25%)
+
+```{r}
+set.seed(13)
+```
+
+
+```{r}
+spoty_split<-clustered_data %>% initial_split(prop=0.75,strata = class)
+```
+
+
+```{r}
+spoty_train <- spoty_split %>% training()
+spoty_test <- spoty_split %>% testing()
+```
+
+
+#Q2. Create the same recipe proposed in the paper exam (see attached document): 
+
+```{r}
+spoty_rec <- spoty_train %>%
+recipe(formula = class ~.) %>%
+ step_corr(all_numeric_predictors(), threshold = 0.9) %>%
+  step_nzv(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_other(all_nominal_predictors(), threshold = 0.05) %>%
+  step_dummy(all_nominal_predictors()) 
+spoty_rec
+```
+
+#the multinomial regresion  modele :
+
+```{r}
+spoty_reg <- multinom_reg(penalty = 0.1,mixture = 0.5) %>%
+  set_mode("classification") %>%
+  set_engine("glmnet")
+spoty_reg
+```
+
+# the xg boost moodle : 
+
+```{r}
+spoty_xg<- boost_tree() %>%
+set_mode("classification") %>%
+set_engine("xgboost")
+spoty_xg
+```
+
+
+#Combine the recipe and multinomial regression model into a workflow
+```{r}
+spoty_wf_reg <- workflow() %>%
+  add_model(spoty_reg) %>%
+  add_recipe(spoty_rec)
+spoty_wf_reg
+```
+
+
+
+#Fit the multinomial regression model to the data
+
+```{r}
+spoty_reg_fit <- spoty_wf_reg %>% fit(spoty_train)
+```
+
+
+
+```{r}
+spoty_reg_fit %>% tidy()
+```
+
+
+```{r}
+spoty_pred <- spoty_reg_fit %>% predict(new_data = spoty_test,type = "prob")
+spoty_pred
+```
+
+
+```{r}
+spoty_pred_class <- spoty_reg_fit %>% predict(new_data = spoty_test,type = "class")
+spoty_pred_class
+```
+
+
+```{r}
+spoty_reg_res <-spoty_wf_reg%>% last_fit(split = spoty_split)
+```
+
+
+```{r}
+spoty_reg_res%>%collect_metrics()
+```
+
+
+```{r}
+spoty_wf_xg<- workflow() %>%
+  add_model(spoty_xg) %>%
+  add_recipe(spoty_rec)
+spoty_wf_xg
+```
+
+
+```{r}
+spoty_xg_res <- spoty_wf_xg %>% last_fit(split = spoty_split)
+spoty_xg_res %>% collect_metrics()
+```
+
+
+```{r}
+spoty_xg_res %>% collect_predictions()
+```
+
+
+#confusion matrix for regression 
+```{r}
+ spoty_reg_res%>% collect_predictions() %>%
+conf_mat(truth = class,estimate = .pred_class)
+```
+
+#confusion matrix for xg : 
+```{r}
+ spoty_xg_res%>% collect_predictions() %>%
+conf_mat(truth = class,estimate = .pred_class)
+```
+
+#FOR REGRESSION ; different performance measure individually
+
+
+
+```{r}
+spoty_reg_res %>% collect_predictions() %>%
+roc_curve(truth = class, .pred_high,.pred_low,.pred_medium,.pred_popular) %>%
+autoplot()
+```
+
+
+```{r}
+spoty_reg_res %>% collect_predictions() %>%
+conf_mat(truth = class,estimate = .pred_class) %>%
+summary()
+```
+
+
+#FOR XG boost ; different performance measure 
+
+```{r}
+spoty_xg_res %>% collect_predictions() %>%
+roc_curve(truth = class, .pred_high,.pred_low,.pred_medium,.pred_popular) %>%
+autoplot()
+```
+
+```{r}
+spoty_xg_res %>% collect_predictions() %>%
+conf_mat(truth = class,estimate = .pred_class) %>%
+summary()
+```
+
+#Comment : 
+
+we found that xg boost is better than the regression model after analysing the metrics 
+
+
+#partie 05 :
+
+what are the potential improvment to achieve better results : 
+
+Hyperparameter Tuning: Further optimize the hyperparameters of the XGBoost model using techniques like grid search 
+
+Feature Engineering: Explore additional features or transformations that could enhance the model's ability to capture complex patterns in the data.
+
+Ensemble Methods: Consider building an ensemble of XGBoost models with different configurations to further boost performance.
+
+
+#Feature Engineering
+```{r}
+best_spoty <- subset(clustered_data, select = -c(1:4))
+```
+
+
+```{r}
+str(best_spoty)
+```
+
+```{r}
+best_spoty_split <- best_spoty %>% initial_split(prop = 0.75,strata = class)
+best_spoty_train <- best_spoty_split%>% training()
+best_spoty_test <- best_spoty_split %>% testing()
+```
+
+
+#create a 10-fold cross validation object.
+```{r}
+spoty_cv <- best_spoty_train %>% vfold_cv(v = 10,strata = class)
+```
+
+
+#create a recipe containing a normalization and transform all ordinal variables in the dataset into ordinal scores.
+```{r}
+spoty_rec_final <- best_spoty_train %>%
+recipe(formula = class ~.) %>%
+step_corr(all_numeric_predictors(),threshold = 0.95) %>%
+step_zv(all_numeric_predictors()) %>%
+step_nzv(all_numeric_predictors()) %>%
+step_impute_median(all_numeric_predictors()) %>%
+step_impute_mode(all_nominal_predictors()) %>%
+step_normalize(all_numeric_predictors()) %>%
+step_ordinalscore(all_ordered_predictors())%>%
+step_other(all_nominal_predictors(),threshold = 0.05) %>%
+step_dummy(all_nominal_predictors(),one_hot = T)
+spoty_rec_final
+```
+
+#model specification: 
+
+```{r}
+spoty_reg <- multinom_reg(penalty = tune(),mixture = 0.5) %>%
+  set_mode("classification") %>%
+  set_engine("glmnet")
+spoty_reg
+```
+
+
+```{r}
+spoty_wf_final <- workflow() %>%
+add_recipe(spoty_rec_final) %>%
+add_model(spoty_reg)
+spoty_wf_final
+```
+#grid containing some proposed values
+```{r}
+spoty_grid <- grid_regular(penalty(range = c(50, 500)),
+levels = 10)
+spoty_grid
+```
+
+
+```{r}
+spoty_grid2 <- tibble(penalty = seq(50,500,50))
+spoty_grid2
+```
+
+
+```{r}
+ctrl <- control_grid(verbose = T)
+```
+
+
+#tunne the model : 
+
+```{r}
+best_spoty_res <- spoty_wf_final %>%
+tune_grid(resamples = spoty_cv,grid = spoty_grid2,control = ctrl)
+```
+
+
+
+```{r}
+best_spoty_res %>% show_best(metric = "accuracy", n =10)
+```
+#the best value of the penalty
+```{r}
+spoty_best <- best_spoty_res %>% select_best(metric = "accuracy")
+```
+
+```{r}
+spoty_best
+```
+
+
+
+
+
+
+
+
+
+
+
